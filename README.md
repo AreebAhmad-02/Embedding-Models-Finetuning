@@ -47,7 +47,7 @@ The source PDFs are scanned images, so the text first has to be read. `OCR_of_Sc
 
 ### 2. Synthetic training data
 
-There are no labelled questions for these documents, so an LLM generates them. Each passage is given to **Zephyr-7B-beta** (4-bit quantised), which writes:
+There are no labelled questions for these documents, so an LLM generates them. Each passage is given to **Zephyr-7B-beta** ([`HuggingFaceH4/zephyr-7b-beta`](https://huggingface.co/HuggingFaceH4/zephyr-7b-beta), 4-bit quantised), which writes:
 
 - **Question → passage pairs**: questions a user might ask that the passage answers (238 training and 103 evaluation questions).
 - **Anchor → positive pairs with a similarity score**: two related statements and how similar they are (132 training and 35 evaluation pairs).
@@ -58,9 +58,9 @@ Training and evaluation questions come from **different passages**, so the evalu
 
 | Loss | Base model | Data it needs | Outcome |
 |---|---|---|---|
-| **Multiple Negatives Ranking Loss** | `BAAI/bge-small-en` | Question → passage pairs; other passages in the batch act as negatives | Clear retrieval gains (table above) |
-| **CoSENT** and **AnglE** | `BAAI/bge-large-en-v1.5` | Pairs with graded similarity scores | Did not improve similarity correlation on this small set; the LLM-generated scores were likely too noisy |
-| **GISTEmbed** | `microsoft/mpnet-base`, guided by `BAAI/bge-base-en-v1.5` | Anchor → positive pairs; a guide model filters false negatives | Trained and published for comparison |
+| **Multiple Negatives Ranking Loss** | [`BAAI/bge-small-en`](https://huggingface.co/BAAI/bge-small-en) | Question → passage pairs; other passages in the batch act as negatives | Clear retrieval gains (table above) |
+| **CoSENT** and **AnglE** | [`BAAI/bge-large-en-v1.5`](https://huggingface.co/BAAI/bge-large-en-v1.5) | Pairs with graded similarity scores | Did not improve similarity correlation on this small set; the LLM-generated scores were likely too noisy |
+| **GISTEmbed** | [`microsoft/mpnet-base`](https://huggingface.co/microsoft/mpnet-base), guided by [`BAAI/bge-base-en-v1.5`](https://huggingface.co/BAAI/bge-base-en-v1.5) | Anchor → positive pairs; a guide model filters false negatives | Trained and published for comparison |
 
 The comparison suggests that, with a few hundred synthetic examples, **contrastive training on question–passage pairs is the most reliable choice**: it needs no similarity labels, so it is not limited by how well the LLM can score similarity.
 
@@ -68,7 +68,10 @@ The comparison suggests that, with a few hundred synthetic examples, **contrasti
 
 - [Areeb-02/bge-small-en-MultiplrRankingLoss-Tax-dataset](https://huggingface.co/Areeb-02/bge-small-en-MultiplrRankingLoss-Tax-dataset): the best-performing model above
 - [Areeb-02/bge-large-en-v1.5-AngleLoss-25-Epochs](https://huggingface.co/Areeb-02/bge-large-en-v1.5-AngleLoss-25-Epochs)
+- [Areeb-02/bge-large-en-v1.5-CosentLoss](https://huggingface.co/Areeb-02/bge-large-en-v1.5-CosentLoss)
 - [Areeb-02/mpnet-base-GISTEmbedLoss-MSEE_Evaluator-salestax-docs](https://huggingface.co/Areeb-02/mpnet-base-GISTEmbedLoss-MSEE_Evaluator-salestax-docs)
+
+Dataset: [`Areeb-02/Q-corpus-sales-tax`](https://huggingface.co/datasets/Areeb-02/Q-corpus-sales-tax) (synthetic question → passage pairs).
 
 Use the fine-tuned model like any Sentence Transformers model:
 
